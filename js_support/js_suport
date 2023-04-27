@@ -1,0 +1,72 @@
+
+    static encryptPayload(privateKey, payload, receiverPubicKey) {
+        let diff = new Date().getTime();
+        return new Promise((resolve, reject) => {
+            BridgeModule.payloadEncrypt(privateKey, payload, receiverPubicKey, (errorMessage) => {
+                debugger;
+                reject(errorMessage)
+            }, (success) => {
+                console.log("Diff>>>>>> ", new Date().getTime() - diff);
+                resolve(JSON.parse(success))
+            });
+
+        })
+    }
+static encryptJSONLd(jsonLd, rootReceiptID, rootDocDetails, isDirect = false, txnType = "public", exchangeDetails) {
+        //return Promise.resolve({ receiptJson: JSON.stringify(jsonLd) })
+
+        let privateKey = Utils.getPrivateKey()
+        let publicKey = exchangeDetails[0].publicKey
+
+        if (jsonLd) {
+            jsonLd = JSON.stringify(jsonLd)
+        }
+
+        if (txnType === "public") {
+            return Promise.resolve({ receiptJson: jsonLd })
+        }
+
+        if (isDirect) {
+            publicKey = Utils.getPublicKey()//TODO: provider public key
+        }
+        let subscribers = []
+        let encryptedPayload = { receiptJson: "", rootDetails: { receiptKey: "", rootId: "" }, subscribers }
+        return Utils.encryptPayload(privateKey, jsonLd, publicKey).then(encryptedResponse => {
+            debugger;
+            // const receiptKey = ECIES.getReceiptKey(privateKey, encryptedResponse.encrypedString);
+            encryptedPayload.receiptJson = encryptedResponse.encrypedString;
+            encryptedPayload.rootDetails.receiptKey = encryptedResponse.receiptKey;
+            return Utils.encryptSubscribersV1(privateKey, exchangeDetails, encryptedResponse.receiptKey)
+        }).then(res => {
+            debugger;
+            encryptedPayload.subscribers = res;
+            return encryptedPayload;
+        }).catch(e => {
+            debugger;
+            console.log("Exception: ", e)
+        })
+    }
+
+    static encryptSubscribersV1(privateKey, exchangeDetails, encryptedRandomStr) {
+        let subscribers = {};
+        if (!exchangeDetails) {
+            exchangeDetails = []
+        }
+        if (!Array.isArray(exchangeDetails)) {
+            exchangeDetails = [exchangeDetails]
+        }
+        let promiseArray = []
+        for (let index = 0; index < exchangeDetails.length; index++) {
+            if (exchangeDetails[index].paramID && exchangeDetails[index].publicKey) {
+                let exchangePublicKey = exchangeDetails[index].publicKey
+                let promise = Utils.encryptPayload(privateKey, encryptedRandomStr, exchangePublicKey).then(res=>{
+                    subscribers[exchangeDetails[index].paramID] = res.encrypedString
+                })
+                promiseArray.push(promise)
+            }
+        }
+        return Promise.all(promiseArray).then(res=>{
+            return subscribers;
+        });
+    }
+
