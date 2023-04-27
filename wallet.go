@@ -13,6 +13,7 @@ import (
 type PrivateKey ecdsa.PrivateKey
 type PublicKey ecdsa.PublicKey
 type Address common.Address
+
 // type SignType byte
 
 // const (
@@ -96,24 +97,24 @@ func (paramHDWallet ParamHDWallet) GetPublicKey() (*string, error) {
 	return &privateKeyHex, nil
 }
 
-//func (ParamHDWallet ParamHDWallet) SignId(Id string) (*string, error) {
-//	if Id == "" {
-//		log.Errorln("[Wallet]TxnId is empty")
-//		return nil, errors.New("ID cannot be empty")
+//	func (ParamHDWallet ParamHDWallet) SignId(Id string) (*string, error) {
+//		if Id == "" {
+//			log.Errorln("[Wallet]TxnId is empty")
+//			return nil, errors.New("ID cannot be empty")
+//		}
+//		jsonByteID, err := json.Marshal(Id)
+//		if err != nil {
+//			return nil, err
+//		}
+//		payloadHash := crypto.Keccak256Hash(jsonByteID)
+//		signature, err := crypto.Sign(payloadHash.Bytes(), ParamHDWallet.privateKey)
+//		if err != nil {
+//			return nil, err
+//		}
+//		StrId:= hexutil.Encode(signature)
+//		return &StrId, nil
 //	}
-//	jsonByteID, err := json.Marshal(Id)
-//	if err != nil {
-//		return nil, err
-//	}
-//	payloadHash := crypto.Keccak256Hash(jsonByteID)
-//	signature, err := crypto.Sign(payloadHash.Bytes(), ParamHDWallet.privateKey)
-//	if err != nil {
-//		return nil, err
-//	}
-//	StrId:= hexutil.Encode(signature)
-//	return &StrId, nil
-//}
-func (paramHDWallet ParamHDWallet) Sign(txnInterface interface{}, signType  byte) (map[string]interface{}, error) {
+func (paramHDWallet ParamHDWallet) Sign(txnInterface interface{}, signType byte) (map[string]interface{}, error) {
 	if signType != 1 && signType != 0 {
 		return nil, errors.New("invalid signed type")
 	}

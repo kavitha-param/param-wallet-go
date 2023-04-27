@@ -5,9 +5,10 @@ import (
 	"crypto/rand"
 	"crypto/sha512"
 	"encoding/base64"
+	"fmt"
 	"hash"
 	"io"
-	"fmt"
+
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/crypto/ecies"

@@ -25,6 +25,7 @@ static encryptJSONLd(jsonLd, rootReceiptID, rootDocDetails, isDirect = false, tx
         if (txnType === "public") {
             return Promise.resolve({ receiptJson: jsonLd })
         }
+        
 
         if (isDirect) {
             publicKey = Utils.getPublicKey()//TODO: provider public key
